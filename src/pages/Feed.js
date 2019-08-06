@@ -1,4 +1,7 @@
 import React, { Component } from 'react';
+import api from '../services/api';
+import io from 'socket.io-client';
+
 import './Feed.css';
 
 import more from '../assets/more.svg';
@@ -7,64 +10,77 @@ import comment from '../assets/comment.svg';
 import send from '../assets/send.svg';
 
 class Feed extends Component {
+
+    state = {
+        feed: [],
+    };
+    async componentDidMount() {
+
+        this.registerToSocket();
+
+        const response = await api.get('posts');
+        this.setState({ feed: response.data });
+    }
+
+    registerToSocket = () => {
+
+        const socket = io('origins', 'http://192.168.1.6:3001/');
+
+        socket.on('like', () => {
+            console.log(socket.connected); // true
+        });
+
+        // socket.on('posts', newPost => {
+        //     this.setState({ feed: [newPost, ...this.state.feed] });
+        // })
+
+        // socket.on('like', newLike => {
+        //     this.setState({
+        //         feed: this.state.feed.map(post =>
+        //             post._id === newLike._id ? newLike : post
+        //         )
+        //     });
+        // })
+    }
+
+    handleLike = id => {
+        api.post(`/posts/${id}/like`);
+    }
+
     render() {
         return (
             <section id="post-list">
-                <article>
-                    <header>
-                        <div className="user-info">
-                            <span>Deyvison Penha</span>
-                            <span className="place">Belém do Pará</span>
-                        </div>
+                {this.state.feed.map(post => (
+                    <article key={post._id}>
+                        <header>
+                            <div className="user-info">
+                                <span>{post.author}</span>
+                                <span className="place">{post.place}</span>
+                            </div>
 
-                        <img src={more} alt="Mais" />
-                    </header>
+                            <img src={more} alt="Mais" />
+                        </header>
 
-                    <img src="https://cdn.pixabay.com/photo/2015/06/25/17/56/people-821624_960_720.jpg" alt="" />
+                        <img src={`http://192.168.1.6:3001/files/${post.image}`} alt="" />
 
-                    <footer>
-                        <div className="actions">
-                            <img src={like} alt="" />
-                            <img src={comment} alt="" />
-                            <img src={send} alt="" />
-                        </div>
+                        <footer>
+                            <div className="actions">
+                                <button type="button" onClick={() => this.handleLike(post._id)}>
+                                    <img src={like} alt="" />
+                                </button>
+                                <img src={comment} alt="" />
+                                <img src={send} alt="" />
+                            </div>
 
-                        <strong>900 curtidas</strong>
-                        <p>
-                            Uma foto do AP
-                            <span>#apartamento</span>
-                            <span>#meuap</span>
-                        </p>
-                    </footer>
-                </article>
+                            <strong> {post.likes} curtidas</strong>
+                            <p>
+                                {post.description}
+                                <span> {post.hashtags} </span>
+                            </p>
+                        </footer>
+                    </article>
 
-                <article>
-                    <header>
-                        <div className="user-info">
-                            <span>Deyvison Penha</span>
-                            <span className="place">Belém do Pará</span>
-                        </div>
-
-                        <img src={more} alt="Mais" />
-                    </header>
-
-                    <img src="https://cdn.pixabay.com/photo/2015/06/22/08/37/children-817365_960_720.jpg" alt="" />
-
-                    <footer>
-                        <div className="actions">
-                            <img src={like} alt="" />
-                            <img src={comment} alt="" />
-                            <img src={send} alt="" />
-                        </div>
-
-                        <strong>900 curtidas</strong>
-                        <p>
-                            Uma foto do AP
-                            <span>#apartamento</span>
-                            <span>#meuap</span>
-                        </p>
-                    </footer>
-                </article>
+                ))}
             </section>
         );
     }
