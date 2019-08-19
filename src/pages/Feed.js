@@ -9,11 +9,16 @@ import like from '../assets/like.svg';
 import comment from '../assets/comment.svg';
 import send from '../assets/send.svg';
 
+require('dotenv').config();
+
 class Feed extends Component {
 
     state = {
         feed: [],
     };
+    //baseUrl = 'https://instarocketapi.herokuapp.com';
+    baseUrl = process.env.REACT_APP_URL;
+
     async componentDidMount() {
 
         this.registerToSocket();
@@ -23,24 +28,19 @@ class Feed extends Component {
     }
 
     registerToSocket = () => {
+        const socket = io(this.baseUrl);
 
-        const socket = io('origins', 'http://192.168.1.6:3001/');
-
-        socket.on('like', () => {
-            console.log(socket.connected); // true
+        socket.on('like', likedPost => {
+            this.setState({
+                feed: this.state.feed.map(post =>
+                    post._id === likedPost._id ? likedPost : post
+                )
+            })
         });
 
-        // socket.on('posts', newPost => {
-        //     this.setState({ feed: [newPost, ...this.state.feed] });
-        // })
-
-        // socket.on('like', newLike => {
-        //     this.setState({
-        //         feed: this.state.feed.map(post =>
-        //             post._id === newLike._id ? newLike : post
-        //         )
-        //     });
-        // })
+        socket.on('post', newPost => {
+            this.setState({ feed: [newPost, ...this.state.feed] });
+        })
     }
 
     handleLike = id => {
@@ -61,7 +61,7 @@ class Feed extends Component {
                             <img src={more} alt="Mais" />
                         </header>
 
-                        <img src={`http://192.168.1.6:3001/files/${post.image}`} alt="" />
+                        <img src={`${this.baseUrl}/files/${post.image}`} alt="" />
 
                         <footer>
                             <div className="actions">
@@ -76,10 +76,10 @@ class Feed extends Component {
                             <p>
                                 {post.description}
                                 <span> {post.hashtags} </span>
+                                {console.log("teste url", process.env.REACT_APP_URL)}
                             </p>
                         </footer>
                     </article>
-
                 ))}
             </section>
         );

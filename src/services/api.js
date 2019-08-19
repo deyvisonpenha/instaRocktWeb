@@ -1,7 +1,10 @@
 import axios from 'axios';
 
+require('dotenv').config();
+
 const api = axios.create({
-  baseURL: 'http://192.168.1.6:3001/',
+  baseURL: process.env.REACT_APP_URL
+  //baseURL: "https://instarocketapi.herokuapp.com",
 });
 
 export default api;
