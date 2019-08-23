@@ -76,7 +76,6 @@ class Feed extends Component {
                             <p>
                                 {post.description}
                                 <span> {post.hashtags} </span>
-                                {console.log("teste url", process.env.REACT_APP_URL)}
                             </p>
                         </footer>
                     </article>
