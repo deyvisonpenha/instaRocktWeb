@@ -61,7 +61,7 @@ class Feed extends Component {
                             <img src={more} alt="Mais" />
                         </header>
 
-                        <img src={`${this.baseUrl}/files/${post.image}`} alt="" />
+                        <img src={`${post.image}`} alt="" />
 
                         <footer>
                             <div className="actions">
